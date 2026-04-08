@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
+import api from '../api/axios';
 
 function Register() {
   const [username, setUsername] = useState('');
@@ -8,7 +10,7 @@ function Register() {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [error, setError] = useState('');
-  const { register } = useAuth();
+  const { register, setUser } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -28,6 +30,21 @@ function Register() {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const response = await api.post('/auth/google/', {
+        token: credentialResponse.credential,
+      });
+      
+      localStorage.setItem('access_token', response.data.access);
+      localStorage.setItem('refresh_token', response.data.refresh);
+      setUser(response.data.user);
+      navigate('/');
+    } catch (err) {
+      setError('Google sign up failed');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
@@ -38,6 +55,22 @@ function Register() {
             {error}
           </div>
         )}
+
+        {/* Google Sign Up Button */}
+        <div className="mb-6">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError('Google sign up failed')}
+            width="100%"
+            text="signup_with"
+          />
+        </div>
+
+        <div className="flex items-center mb-6">
+          <div className="flex-1 border-t border-gray-300"></div>
+          <span className="px-4 text-gray-500 text-sm">or</span>
+          <div className="flex-1 border-t border-gray-300"></div>
+        </div>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
