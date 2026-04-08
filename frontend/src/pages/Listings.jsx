@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/axios';
 
 function Listings() {
@@ -40,21 +41,32 @@ function Listings() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {listings.map((listing) => (
-              <div key={listing.id} className="bg-white rounded-lg shadow overflow-hidden">
-                {listing.image && (
+              <Link
+                key={listing.id}
+                to={`/listings/${listing.id}`}
+                className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                {listing.image ? (
                   <img
                     src={listing.image}
                     alt={listing.title}
                     className="w-full h-48 object-cover"
                   />
+                ) : (
+                  <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-400">No image</span>
+                  </div>
                 )}
                 <div className="p-4">
                   <h3 className="text-xl font-semibold mb-2">{listing.title}</h3>
-                  <p className="text-gray-600 mb-2">{listing.description}</p>
-                  <p className="text-orange-500 font-bold">${listing.price}</p>
-                  <p className="text-sm text-gray-500">By {listing.cook_name}</p>
+                  <p className="text-gray-600 mb-2 line-clamp-2">{listing.description}</p>
+                  <div className="flex justify-between items-center">
+                    <p className="text-orange-500 font-bold">${listing.price}</p>
+                    <p className="text-sm text-gray-500">{listing.prep_time} mins</p>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">By {listing.cook_name}</p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

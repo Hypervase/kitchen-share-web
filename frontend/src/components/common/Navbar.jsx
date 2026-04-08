@@ -1,8 +1,17 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../api/axios';
 
 function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, becomeCook } = useAuth();
+
+  const handleBecomeCook = async () => {
+    try {
+      await becomeCook();
+    } catch (err) {
+      console.error('Failed to become cook:', err);
+    }
+  };
 
   return (
     <nav className="bg-white shadow">
@@ -19,10 +28,17 @@ function Navbar() {
 
             {user ? (
               <>
-                {user.is_cook && (
-                  <Link to="/my-listings" className="text-gray-700 hover:text-orange-500">
-                    My Listings
+                {user.is_cook ? (
+                  <Link to="/create-listing" className="text-gray-700 hover:text-orange-500">
+                    Add Dish
                   </Link>
+                ) : (
+                  <button
+                    onClick={handleBecomeCook}
+                    className="text-orange-500 hover:text-orange-600 font-medium"
+                  >
+                    Become a Cook
+                  </button>
                 )}
                 <Link to="/orders" className="text-gray-700 hover:text-orange-500">
                   Orders
