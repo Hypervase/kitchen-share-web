@@ -1,4 +1,6 @@
 from rest_framework import viewsets, permissions
+from django.db.models import F
+from math import radians, sin, cos, sqrt, atan2
 from .models import Listing
 from .serializers import ListingSerializer
 
@@ -16,9 +18,58 @@ class IsCookOrReadOnly(permissions.BasePermission):
 
 
 class ListingViewSet(viewsets.ModelViewSet):
-    queryset = Listing.objects.filter(available=True)
     serializer_class = ListingSerializer
     permission_classes = [IsCookOrReadOnly]
 
+    def get_queryset(self):
+        queryset = Listing.objects.filter(available=True)
+        
+        # Get user location from query params
+        user_lat = self.request.query_params.get('lat')
+        user_lng = self.request.query_params.get('lng')
+        max_distance = self.request.query_params.get('distance', 10)  # Default 10 miles
+        
+        if user_lat and user_lng:
+            try:
+                user_lat = float(user_lat)
+                user_lng = float(user_lng)
+                max_distance = float(max_distance)
+                
+                # Filter listings that have location set
+                queryset = queryset.exclude(latitude__isnull=True).exclude(longitude__isnull=True)
+                
+                # Filter by distance in Python (for simplicity)
+                nearby_ids = []
+                for listing in queryset:
+                    lat1 = radians(user_lat)
+                    lat2 = radians(float(listing.latitude))
+                    lon1 = radians(user_lng)
+                    lon2 = radians(float(listing.longitude))
+                    
+                    dlat = lat2 - lat1
+                    dlon = lon2 - lon1
+                    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+                    c = 2 * atan2(sqrt(a), sqrt(1-a))
+                    r = 3956  # Earth's radius in miles
+                    distance = r * c
+                    
+                    if distance <= max_distance:
+                        nearby_ids.append(listing.id)
+                
+                queryset = Listing.objects.filter(id__in=nearby_ids, available=True)
+            except (ValueError, TypeError):
+                pass
+        
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def perform_create(self, serializer):
-        serializer.save(cook=self.request.user)
+        # Auto-set location from cook's profile if not provided
+        user = self.request.user
+        latitude = self.request.data.get('latitude') or user.latitude
+        longitude = self.request.data.get('longitude') or user.longitude
+        serializer.save(cook=user, latitude=latitude, longitude=longitude)

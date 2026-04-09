@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
@@ -18,6 +18,8 @@ function CreateListing() {
   });
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [locationStatus, setLocationStatus] = useState('getting');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -33,6 +35,25 @@ function CreateListing() {
   ];
 
   const dietaryOptions = ['Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Nut-Free', 'Halal', 'Kosher'];
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setLocationStatus('success');
+        },
+        (error) => {
+          setLocationStatus('denied');
+        }
+      );
+    } else {
+      setLocationStatus('unavailable');
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -71,6 +92,12 @@ function CreateListing() {
       data.append('servings', formData.servings);
       data.append('available', true);
       data.append('dietary_tags', JSON.stringify(formData.dietary_tags));
+      
+     if (location) {
+        data.append('latitude', location.lat.toFixed(6));
+        data.append('longitude', location.lng.toFixed(6));
+      }
+      
       if (image) {
         data.append('image', image);
       }
@@ -120,6 +147,25 @@ function CreateListing() {
         {error && (
           <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>
         )}
+
+        {/* Location Status */}
+        <div className="mb-4">
+          {locationStatus === 'getting' && (
+            <div className="bg-blue-100 text-blue-700 p-3 rounded">
+              📍 Getting your location...
+            </div>
+          )}
+          {locationStatus === 'success' && (
+            <div className="bg-green-100 text-green-700 p-3 rounded">
+              ✓ Location set - neighbors will be able to find your dish!
+            </div>
+          )}
+          {locationStatus === 'denied' && (
+            <div className="bg-yellow-100 text-yellow-800 p-3 rounded">
+              ⚠️ Location access denied. Your dish won't appear in nearby searches.
+            </div>
+          )}
+        </div>
 
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow">
           {/* Title */}
