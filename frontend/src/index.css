@@ -1,1 +1,177 @@
 @import "tailwindcss";
+
+/* Kitchen Share Design System */
+:root {
+  /* Primary - Warm Orange */
+  --color-primary: #E85D04;
+  --color-primary-light: #F48C06;
+  --color-primary-dark: #DC2F02;
+  
+  /* Secondary - Warm Cream */
+  --color-cream: #FFF8F0;
+  --color-cream-dark: #FAE5D3;
+  
+  /* Neutrals */
+  --color-dark: #1A1A1A;
+  --color-gray-900: #2D2D2D;
+  --color-gray-700: #4A4A4A;
+  --color-gray-500: #6B6B6B;
+  --color-gray-300: #B8B8B8;
+  --color-gray-100: #F5F5F5;
+  --color-white: #FFFFFF;
+  
+  /* Accent */
+  --color-success: #2D6A4F;
+  --color-warning: #F4A261;
+  --color-error: #E63946;
+  
+  /* Typography */
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --shadow-hover: 0 8px 30px rgba(232, 93, 4, 0.15);
+  
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+}
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display&display=swap');
+
+/* Base Styles */
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-cream);
+  color: var(--color-dark);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Utility Classes */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-cream {
+  background-color: var(--color-cream);
+}
+
+/* Button Styles */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-secondary {
+  background-color: var(--color-white);
+  color: var(--color-dark);
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  border: 2px solid var(--color-gray-300);
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Card Styles */
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Input Styles */
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--color-gray-100);
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  transition: all 0.2s ease;
+  background: var(--color-white);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(232, 93, 4, 0.1);
+}
+
+/* Badge Styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.badge-primary {
+  background-color: rgba(232, 93, 4, 0.1);
+  color: var(--color-primary);
+}
+
+.badge-success {
+  background-color: rgba(45, 106, 79, 0.1);
+  color: var(--color-success);
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Leaflet Map Fix */
+.leaflet-container {
+  z-index: 1;
+}
