@@ -1,5 +1,5 @@
 from rest_framework import viewsets, permissions
-from django.db.models import F
+from django.db.models import Q
 from math import radians, sin, cos, sqrt, atan2
 from .models import Listing
 from .serializers import ListingSerializer
@@ -24,10 +24,36 @@ class ListingViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Listing.objects.filter(available=True)
         
+        # Search by title or description
+        search = self.request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(title__icontains=search) | Q(description__icontains=search)
+            )
+        
+        # Filter by cuisine type
+        cuisine = self.request.query_params.get('cuisine')
+        if cuisine and cuisine != 'all':
+            queryset = queryset.filter(cuisine_type=cuisine)
+        
+        # Filter by dietary tags (multiple allowed)
+        dietary_list = self.request.query_params.getlist('dietary')
+        if dietary_list:
+            for dietary in dietary_list:
+                queryset = queryset.filter(dietary_tags__contains=dietary)
+                
+        # Filter by price range
+        min_price = self.request.query_params.get('min_price')
+        max_price = self.request.query_params.get('max_price')
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
+        
         # Get user location from query params
         user_lat = self.request.query_params.get('lat')
         user_lng = self.request.query_params.get('lng')
-        max_distance = self.request.query_params.get('distance', 10)  # Default 10 miles
+        max_distance = self.request.query_params.get('distance', 10)
         
         if user_lat and user_lng:
             try:
@@ -38,7 +64,7 @@ class ListingViewSet(viewsets.ModelViewSet):
                 # Filter listings that have location set
                 queryset = queryset.exclude(latitude__isnull=True).exclude(longitude__isnull=True)
                 
-                # Filter by distance in Python (for simplicity)
+                # Filter by distance
                 nearby_ids = []
                 for listing in queryset:
                     lat1 = radians(user_lat)
@@ -57,6 +83,21 @@ class ListingViewSet(viewsets.ModelViewSet):
                         nearby_ids.append(listing.id)
                 
                 queryset = Listing.objects.filter(id__in=nearby_ids, available=True)
+                
+                # Re-apply text filters after distance filter
+                if search:
+                    queryset = queryset.filter(
+                        Q(title__icontains=search) | Q(description__icontains=search)
+                    )
+                if cuisine and cuisine != 'all':
+                    queryset = queryset.filter(cuisine_type=cuisine)
+                if dietary:
+                    queryset = queryset.filter(dietary_tags__contains=dietary)
+                if min_price:
+                    queryset = queryset.filter(price__gte=min_price)
+                if max_price:
+                    queryset = queryset.filter(price__lte=max_price)
+                    
             except (ValueError, TypeError):
                 pass
         
@@ -68,7 +109,6 @@ class ListingViewSet(viewsets.ModelViewSet):
         return context
 
     def perform_create(self, serializer):
-        # Auto-set location from cook's profile if not provided
         user = self.request.user
         latitude = self.request.data.get('latitude') or user.latitude
         longitude = self.request.data.get('longitude') or user.longitude
