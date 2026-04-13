@@ -4,6 +4,11 @@ import api from '../api/axios';
 import ListingsMap from '../components/common/ListingsMap';
 
 function Listings() {
+  const[search, setSearch] = useState('');
+  const[cuisine, setCuisine] = useState('');  
+  const[minPrice, setMinPrice] = useState('');  
+  const[maxPrice, setMaxPrice] = useState(''); 
+
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
@@ -19,7 +24,7 @@ function Listings() {
     if (userLocation) {
       fetchListings();
     }
-  }, [userLocation, maxDistance]);
+  }, [userLocation, maxDistance, search, cuisine, minPrice, maxPrice]);
 
   const getUserLocation = () => {
     if (navigator.geolocation) {
@@ -43,10 +48,16 @@ function Listings() {
 
   const fetchListings = async () => {
     try {
-      let url = '/listings/';
-      if (userLocation) {
-        url += `?lat=${userLocation.lat}&lng=${userLocation.lng}&distance=${maxDistance}`;
-      }
+      let url = '/listings/?';
+        if (userLocation) 
+        {
+          url += `lat=${userLocation.lat}&lng=${userLocation.lng}&distance=${maxDistance}&`;
+        }
+        if(search) url+= `search=${search}&`;
+        if(cuisine) url+= `cuisine=${cuisine}&`;
+        if(minPrice) url+= `min_price=${minPrice}&`;
+        if(maxPrice) url+= `max_price=${maxPrice}&`;
+      
       const response = await api.get(url);
       setListings(response.data.results || []);
     } catch (error) {
@@ -93,7 +104,41 @@ function Listings() {
                 Map
               </button>
             </div>
+            {/* Search Bar */}
+            <input
+              type="text"
+              placeholder="Search dishes..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            {/* Cuisine Filter */}
+            <select
+              value={cuisine}
+              onChange={(e) => setCuisine(e.target.value)}
+              className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="">All Cuisines</option>
+              <option value="italian">Italian</option>
+              <option value="mexican">Mexican</option>
+              <option value="indian">Indian</option>
+            </select>
 
+            {/*Price Range Filter*/}
+            <input 
+              type = "number"
+              placeholder="Min Price"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <input 
+              type = "number"
+              placeholder="Max Price"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
             {/* Distance Filter */}
             {userLocation && (
               <div className="flex items-center gap-2">

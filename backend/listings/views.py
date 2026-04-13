@@ -23,6 +23,20 @@ class ListingViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Listing.objects.filter(available=True)
+
+        search = self.request.query_params.get('search')
+        cuisine = self.request.query_params.get('cuisine')
+        min_price = self.request.query_params.get('min_price')
+        max_price = self.request.query_params.get('max_price')
+
+        if search:
+            queryset = queryset.filter(title__icontains=search)
+        if cuisine:
+            queryset = queryset.filter(cuisine_type=cuisine)
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
         
         # Get user location from query params
         user_lat = self.request.query_params.get('lat')
@@ -56,7 +70,7 @@ class ListingViewSet(viewsets.ModelViewSet):
                     if distance <= max_distance:
                         nearby_ids.append(listing.id)
                 
-                queryset = Listing.objects.filter(id__in=nearby_ids, available=True)
+                queryset = queryset.filter(id__in=nearby_ids)
             except (ValueError, TypeError):
                 pass
         
