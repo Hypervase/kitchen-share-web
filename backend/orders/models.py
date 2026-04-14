@@ -2,9 +2,9 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+
 class Order(models.Model):
-    class Status(models.TextChoices): 
-    
+    class Status(models.TextChoices):
         PENDING = 'pending', 'Pending'
         ACCEPTED = 'accepted', 'Accepted'
         PREPARING = 'preparing', 'Preparing'
@@ -19,6 +19,15 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     pickup_time = models.DateTimeField()
     notes = models.TextField(blank=True)
+    
+    # Store customization selections
+    # Format: {"Size": "Large", "Spice Level": "Medium"}
+    selected_options = models.JSONField(default=dict, blank=True)
+    
+    # Store add-on selections
+    # Format: [{"name": "Extra Cheese", "price": 1.50}]
+    selected_add_ons = models.JSONField(default=list, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -28,11 +37,6 @@ class Order(models.Model):
     class Meta:
         ordering = ['-created_at']
 
-class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    listing = models.ForeignKey('listings.Listing', on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)
-    price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)
 
 class Review(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='review')

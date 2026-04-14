@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from google.oauth2 import id_token
@@ -21,9 +22,18 @@ class RegisterView(generics.CreateAPIView):
 class MeView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_object(self):
         return self.request.user
+
+    def patch(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BecomeCookView(APIView):
@@ -36,8 +46,17 @@ class BecomeCookView(APIView):
         
         user.is_cook = True
         user.save()
-        CookProfile.objects.create(user=user)
+        CookProfile.objects.get_or_create(user=user)
         return Response({"detail": "You are now a cook!"}, status=status.HTTP_201_CREATED)
+
+
+class CookProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = CookProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        profile, created = CookProfile.objects.get_or_create(user=self.request.user)
+        return profile
 
 
 class GoogleLoginView(APIView):
@@ -50,14 +69,12 @@ class GoogleLoginView(APIView):
             return Response({"detail": "Token required"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            # Verify the Google token
             client_id = settings.SOCIALACCOUNT_PROVIDERS['google']['APP']['client_id']
             idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), client_id)
             
             email = idinfo.get('email')
             name = idinfo.get('name', '')
             
-            # Get or create user
             user, created = User.objects.get_or_create(
                 email=email,
                 defaults={
@@ -67,7 +84,6 @@ class GoogleLoginView(APIView):
                 }
             )
             
-            # Generate JWT tokens
             refresh = RefreshToken.for_user(user)
             
             return Response({

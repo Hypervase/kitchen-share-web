@@ -38,17 +38,6 @@ function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-2">
-            <Link
-              to="/listings"
-              className={`px-4 py-2 rounded-full font-medium transition-all ${
-                isActive('/listings')
-                  ? 'bg-orange-50 text-orange-600'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-              }`}
-            >
-              Browse
-            </Link>
-
             {user ? (
               <>
                 {user.is_cook ? (
@@ -83,14 +72,14 @@ function Navbar() {
                 
                 <div className="w-px h-6 bg-gray-200 mx-2"></div>
                 
-                <div className="flex items-center gap-3">
+                <Link to="/profile" className="flex items-center gap-3 hover:opacity-80 transition-all">
                   <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center">
                     <span className="text-orange-600 font-semibold text-sm">
                       {user.username.charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <span className="font-medium text-gray-700">{user.username}</span>
-                </div>
+                </Link>
                 
                 <button
                   onClick={logout}
@@ -136,11 +125,16 @@ function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t">
             <div className="flex flex-col gap-2">
-              <Link to="/listings" className="px-4 py-3 rounded-xl hover:bg-gray-50 font-medium">
-                Browse
-              </Link>
               {user ? (
                 <>
+                  <Link to="/profile" className="px-4 py-3 rounded-xl hover:bg-gray-50 font-medium flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                      <span className="text-orange-600 font-semibold text-sm">
+                        {user.username.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    My Profile
+                  </Link>
                   {user.is_cook && (
                     <Link to="/create-listing" className="px-4 py-3 rounded-xl hover:bg-gray-50 font-medium">
                       Add Dish
