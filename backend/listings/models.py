@@ -26,6 +26,27 @@ class Listing(models.Model):
     servings = models.PositiveIntegerField(default=1)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    
+    # New fields for richer listings
+    ingredients = models.TextField(blank=True, help_text="List of main ingredients")
+    allergens = models.JSONField(default=list, blank=True)  # ['nuts', 'dairy', 'gluten']
+    spice_level = models.CharField(max_length=20, blank=True, choices=[
+        ('none', 'Not Spicy'),
+        ('mild', 'Mild'),
+        ('medium', 'Medium'),
+        ('hot', 'Hot'),
+        ('extra_hot', 'Extra Hot'),
+    ])
+    calories = models.PositiveIntegerField(null=True, blank=True)
+    
+    # Customization options stored as JSON
+    # Format: [{"name": "Size", "required": true, "options": [{"label": "Small", "price": 0}, {"label": "Large", "price": 3}]}]
+    customization_options = models.JSONField(default=list, blank=True)
+    
+    # Add-ons stored as JSON
+    # Format: [{"name": "Extra Cheese", "price": 1.50}, {"name": "Bacon", "price": 2.00}]
+    add_ons = models.JSONField(default=list, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
