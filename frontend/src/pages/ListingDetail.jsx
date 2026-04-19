@@ -177,10 +177,20 @@ function ListingDetail() {
                         <span>👨‍🍳</span>
                       )}
                     </div>
+                    
+
                     <div>
-                      <p className="font-medium" style={{ color: 'var(--color-dark)' }}>{listing.cook_name}</p>
+                      <Link 
+                        to={`/cook/${listing.cook}`}
+                        className="font-medium hover:underline"
+                        style={{ color: 'var(--color-dark)' }}
+                      >
+                        {listing.cook_name}
+                      </Link>
                       <p className="text-sm" style={{ color: 'var(--color-gray-500)' }}>Home Cook</p>
                     </div>
+
+
                   </div>
                 </div>
                 <div className="text-right">

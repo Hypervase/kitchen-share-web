@@ -9,9 +9,10 @@ from google.auth.transport import requests as google_requests
 from django.conf import settings
 from .serializers import UserSerializer, RegisterSerializer, CookProfileSerializer
 from .models import CookProfile
+from orders.models import Review
+from orders.serializers import ReviewSerializer
 
 User = get_user_model()
-
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -49,7 +50,41 @@ class BecomeCookView(APIView):
         CookProfile.objects.get_or_create(user=user)
         return Response({"detail": "You are now a cook!"}, status=status.HTTP_201_CREATED)
 
+class CookPublicProfileView(generics.RetrieveAPIView):
+    permission_classes = [permissions.AllowAny]
 
+    def retrieve(self, request, pk=None):
+        from rest_framework.response import Response
+        from rest_framework import status
+        try:
+            cook = User.objects.get(pk=pk, is_cook=True)
+        except User.DoesNotExist:
+            return Response({"detail": "Cook not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        cook_profile = getattr(cook, 'cook_profile', None)
+        listings = cook.listings.filter(available=True).values(
+            'id', 'title', 'price', 'image', 'cuisine_type', 'prep_time'
+        )
+        reviews = Review.objects.filter(
+            order__listing__cook=cook
+        ).select_related('reviewer').order_by('-created_at')
+
+        review_data = ReviewSerializer(reviews, many=True).data
+
+        return Response({
+            'id': cook.id,
+            'username': cook.username,
+            'first_name': cook.first_name,
+            'last_name': cook.last_name,
+            'profile_image': request.build_absolute_uri(cook.profile_image.url) if cook.profile_image else None,
+            'bio': cook_profile.bio if cook_profile else '',
+            'kitchen_description': cook_profile.kitchen_description if cook_profile else '',
+            'rating': float(cook_profile.rating) if cook_profile else 0,
+            'is_verified': cook_profile.is_verified if cook_profile else False,
+            'listings': list(listings),
+            'reviews': review_data,
+            'total_reviews': len(review_data),
+        })
 class CookProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = CookProfileSerializer
     permission_classes = [permissions.IsAuthenticated]

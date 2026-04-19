@@ -9,6 +9,7 @@ import ListingDetail from './pages/ListingDetail';
 import EditListing from './pages/EditListing';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
+import CookProfile from './pages/CookProfile';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/edit-listing/:id" element={<EditListing />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/cook/:id" element={<CookProfile />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -4,11 +4,6 @@ import api from '../api/axios';
 import ListingsMap from '../components/common/ListingsMap';
 
 function Listings() {
-  const[search, setSearch] = useState('');
-  const[cuisine, setCuisine] = useState('');  
-  const[minPrice, setMinPrice] = useState('');  
-  const[maxPrice, setMaxPrice] = useState(''); 
-
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
@@ -22,6 +17,7 @@ function Listings() {
   const [selectedDietary, setSelectedDietary] = useState([]);
   const [maxDistance, setMaxDistance] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
+  const [priceRange, setPriceRange] = useState('');
   
   const cuisineOptions = [
     { value: 'all', label: 'All Cuisines' },
@@ -53,10 +49,7 @@ function Listings() {
     if (userLocation || locationError) {
       fetchListings();
     }
-<<<<<<< HEAD
-  }, [userLocation, maxDistance, search, cuisine, minPrice, maxPrice]);
-=======
-  }, [userLocation, locationError, maxDistance, cuisine, selectedDietary]);
+  }, [userLocation, locationError, maxDistance, cuisine, selectedDietary, priceRange]);
   // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -66,7 +59,6 @@ function Listings() {
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
->>>>>>> upstream/main
 
   const getUserLocation = () => {
     if (navigator.geolocation) {
@@ -88,19 +80,6 @@ function Listings() {
 
   const fetchListings = async () => {
     try {
-<<<<<<< HEAD
-      let url = '/listings/?';
-        if (userLocation) 
-        {
-          url += `lat=${userLocation.lat}&lng=${userLocation.lng}&distance=${maxDistance}&`;
-        }
-        if(search) url+= `search=${search}&`;
-        if(cuisine) url+= `cuisine=${cuisine}&`;
-        if(minPrice) url+= `min_price=${minPrice}&`;
-        if(maxPrice) url+= `max_price=${maxPrice}&`;
-      
-      const response = await api.get(url);
-=======
       let params = new URLSearchParams();
       
       if (userLocation) {
@@ -113,9 +92,9 @@ function Listings() {
       if (selectedDietary.length > 0) {
         selectedDietary.forEach(d => params.append('dietary', d));
       }
+      if(priceRange) params.append('max_price', priceRange);
       
       const response = await api.get(`/listings/?${params.toString()}`);
->>>>>>> upstream/main
       setListings(response.data.results || []);
     } catch (error) {
       console.error('Failed to fetch listings:', error);
@@ -129,9 +108,10 @@ function Listings() {
     setCuisine('all');
     setSelectedDietary([]);
     setMaxDistance(10);
+    setPriceRange('');
   };
 
-  const hasActiveFilters = search || cuisine !== 'all' || selectedDietary.length > 0 || maxDistance !== 10;
+  const hasActiveFilters = search || cuisine !== 'all' || selectedDietary.length > 0 || maxDistance !== 10 || priceRange;
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-cream)' }}>
@@ -144,76 +124,6 @@ function Listings() {
   }
 
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto py-8 px-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <h1 className="text-3xl font-bold">Dishes Near You</h1>
-          
-          <div className="flex items-center gap-4">
-            {/* View Toggle */}
-            <div className="flex bg-gray-200 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  viewMode === 'list' ? 'bg-white shadow' : 'hover:bg-gray-300'
-                }`}
-              >
-                List
-              </button>
-              <button
-                onClick={() => setViewMode('map')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  viewMode === 'map' ? 'bg-white shadow' : 'hover:bg-gray-300'
-                }`}
-              >
-                Map
-              </button>
-            </div>
-            {/* Search Bar */}
-            <input
-              type="text"
-              placeholder="Search dishes..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            {/* Cuisine Filter */}
-            <select
-              value={cuisine}
-              onChange={(e) => setCuisine(e.target.value)}
-              className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              <option value="">All Cuisines</option>
-              <option value="italian">Italian</option>
-              <option value="mexican">Mexican</option>
-              <option value="indian">Indian</option>
-            </select>
-
-            {/*Price Range Filter*/}
-            <input 
-              type = "number"
-              placeholder="Min Price"
-              value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
-              className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <input 
-              type = "number"
-              placeholder="Max Price"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-              className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            {/* Distance Filter */}
-            {userLocation && (
-              <div className="flex items-center gap-2">
-                <label className="text-gray-600">Within:</label>
-                <select
-                  value={maxDistance}
-                  onChange={(e) => setMaxDistance(Number(e.target.value))}
-                  className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-=======
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-cream)' }}>
 {/* Header */}
       <div className="bg-white border-b sticky top-20 z-40">
@@ -232,7 +142,6 @@ function Listings() {
                 <button
                   onClick={() => setSearch('')}
                   className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-200 text-gray-500 hover:bg-gray-300 flex items-center justify-center text-sm"
->>>>>>> upstream/main
                 >
                   ✕
                 </button>
@@ -301,6 +210,39 @@ function Listings() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Price Range */}
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: 'var(--color-gray-600)' }}>Price</p>
+                <div className="flex flex-col gap-2">
+                  {[
+                    { label: 'Under $10', value: '10' },
+                    { label: 'Under $20', value: '20' },
+                    { label: 'Under $30', value: '30' },
+                    { label: 'Under $50', value: '50' },
+                  ].map((option) => (
+                    <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="priceRange"
+                        value={option.value}
+                        checked={priceRange === option.value}
+                        onChange={() => setPriceRange(option.value)}
+                        className="accent-orange-500"
+                      />
+                      <span className="text-sm" style={{ color: 'var(--color-gray-600)' }}>{option.label}</span>
+                    </label>
+                  ))}
+                  {priceRange && (
+                    <button
+                      onClick={() => setPriceRange('')}
+                      className="text-xs text-orange-500 hover:text-orange-600 text-left underline mt-1"
+                    >
+                      Clear price filter
+                    </button>
+                  )}
+               </div>
               </div>
 
               {/* Distance Slider */}
@@ -462,9 +404,14 @@ function Listings() {
                           <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
                             <span className="text-sm">👨‍🍳</span>
                           </div>
-                          <span className="text-sm font-medium" style={{ color: 'var(--color-gray-700)' }}>
+                          <Link 
+                            to={`/cook/${listing.cook}`} 
+                            className="text-sm font-medium hover:underline"
+                            style={{ color: 'var(--color-primary)' }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             {listing.cook_name}
-                          </span>
+                          </Link>
                         </div>
                         <span className="text-sm" style={{ color: 'var(--color-gray-500)' }}>
                           ⏱️ {listing.prep_time} min
@@ -515,7 +462,15 @@ function ListingCard({ listing, isSelected, onClick }) {
             {listing.cuisine_type}
           </span>
           <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--color-gray-500)' }}>
-            <span>👨‍🍳 {listing.cook_name}</span>
+            <span>👨‍🍳 </span>
+          <Link
+            to={`/cook/${listing.cook}`}
+            className="hover:underline font-medium"
+            style={{ color: 'var(--color-primary)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {listing.cook_name}
+          </Link>
             <span>•</span>
             <span>⏱️ {listing.prep_time} min</span>
             {listing.distance !== null && (

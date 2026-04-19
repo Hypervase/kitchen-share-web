@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import RegisterView, MeView, BecomeCookView, GoogleLoginView, CookProfileView
+from .views import RegisterView, MeView, BecomeCookView, GoogleLoginView, CookProfileView, CookPublicProfileView
+
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
@@ -10,4 +11,5 @@ urlpatterns = [
     path('become-cook/', BecomeCookView.as_view(), name='become_cook'),
     path('google/', GoogleLoginView.as_view(), name='google_login'),
     path('cook-profile/', CookProfileView.as_view(), name='cook_profile'),
+    path('cook/<int:pk>/', CookPublicProfileView.as_view(), name='cook_public_profile'),
 ]

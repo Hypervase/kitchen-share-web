@@ -522,6 +522,25 @@ function Profile() {
                             "{order.notes}"
                           </p>
                         )}
+
+                        {/* Review Section */}
+                        {order.status === 'completed' && (
+                          <div className="mt-4 pt-4 border-t">
+                            {order.review ? (
+                              <div className="p-3 rounded-xl" style={{ backgroundColor: 'var(--color-cream)' }}>
+                                <p className="text-sm font-medium mb-1" style={{ color: 'var(--color-gray-600)' }}>Your Review</p>
+                                <p className="text-lg">{'⭐'.repeat(order.review.rating)}</p>
+                                {order.review.comment && (
+                                  <p className="text-sm mt-1 italic" style={{ color: 'var(--color-gray-600)' }}>
+                                    "{order.review.comment}"
+                                  </p>
+                                 )}
+                              </div>
+                            ) : (
+                              <ReviewForm orderId={order.id} onSubmit={fetchData} />
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="text-right">
                         <p className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>
@@ -843,5 +862,67 @@ function IncomingOrderCard({ order, onUpdate }) {
     </div>
   );
 }
+function ReviewForm({ orderId, onSubmit }) {
+  const [rating, setRating] = useState(0);
+  const [hovered, setHovered] = useState(0);
+  const [comment, setComment] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
+  const handleSubmit = async () => {
+    if (!rating) return setError('Please select a rating');
+    setSubmitting(true);
+    setError('');
+    try {
+      await api.post(`/orders/${orderId}/review/`, { rating, comment });
+      onSubmit();
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to submit review');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="p-4 rounded-xl border border-orange-100" style={{ backgroundColor: 'var(--color-cream)' }}>
+      <p className="text-sm font-medium mb-3" style={{ color: 'var(--color-gray-700)' }}>
+        Leave a Review
+      </p>
+
+      {/* Star Rating */}
+      <div className="flex gap-1 mb-3">
+        {[1, 2, 3, 4, 5].map(star => (
+          <button
+            key={star}
+            onClick={() => setRating(star)}
+            onMouseEnter={() => setHovered(star)}
+            onMouseLeave={() => setHovered(0)}
+            className="text-2xl transition-transform hover:scale-110"
+          >
+            {star <= (hovered || rating) ? '⭐' : '☆'}
+          </button>
+        ))}
+      </div>
+
+      {/* Comment */}
+      <textarea
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder="How was your experience? (optional)"
+        className="input w-full mb-3"
+        rows={2}
+      />
+
+      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+
+      <button
+        onClick={handleSubmit}
+        disabled={submitting || !rating}
+        className="btn-primary w-full disabled:opacity-50"
+      >
+        {submitting ? 'Submitting...' : 'Submit Review'}
+      </button>
+    </div>
+  );
+}
 export default Profile;

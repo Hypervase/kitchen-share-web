@@ -72,9 +72,6 @@ class ListingViewSet(viewsets.ModelViewSet):
                 nearby_ids = []
                 no_location_ids = []
                 
-<<<<<<< HEAD
-                queryset = queryset.filter(id__in=nearby_ids)
-=======
                 for listing in queryset:
                     if listing.latitude and listing.longitude:
                         lat1 = radians(user_lat)
@@ -99,7 +96,6 @@ class ListingViewSet(viewsets.ModelViewSet):
                 all_ids = nearby_ids + no_location_ids
                 queryset = queryset.filter(id__in=all_ids)
                     
->>>>>>> upstream/main
             except (ValueError, TypeError):
                 pass
         
