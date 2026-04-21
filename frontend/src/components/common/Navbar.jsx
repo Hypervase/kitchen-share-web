@@ -7,14 +7,6 @@ function Navbar() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleBecomeCook = async () => {
-    try {
-      await becomeCook();
-    } catch (err) {
-      console.error('Failed to become cook:', err);
-    }
-  };
-
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -52,12 +44,12 @@ function Navbar() {
                     Add Dish
                   </Link>
                 ) : (
-                  <button
-                    onClick={handleBecomeCook}
+                  <Link
+                    to="/cook-setup"
                     className="px-4 py-2 rounded-full font-medium text-orange-600 hover:bg-orange-50 transition-all"
                   >
                     Become a Cook
-                  </button>
+                  </Link>
                 )}
                 <Link
                   to="/orders"

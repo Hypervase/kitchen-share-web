@@ -13,22 +13,30 @@ function Register() {
   const { register, setUser } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (password !== passwordConfirm) {
-      setError('Passwords do not match');
-      return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  
+  if (password !== passwordConfirm) {
+    setError('Passwords do not match');
+    return;
+  }
+  
+  try {
+    await register(username, email, password, passwordConfirm);
+    
+    // Check if there's a redirect path stored
+    const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+    if (redirectPath) {
+      sessionStorage.removeItem('redirectAfterLogin');
+      navigate(redirectPath);
+    } else {
+      navigate('/');
     }
-
-    try {
-      await register(username, email, password, passwordConfirm);
-      navigate('/login');
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Registration failed');
-    }
-  };
+  } catch (err) {
+    setError(err.response?.data?.detail || 'Registration failed');
+  }
+};
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
@@ -135,5 +143,4 @@ function Register() {
     </div>
   );
 }
-
 export default Register;

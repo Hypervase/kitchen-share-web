@@ -169,29 +169,24 @@ function ListingDetail() {
                   <h1 className="font-display text-3xl mb-2" style={{ color: 'var(--color-dark)' }}>
                     {listing.title}
                   </h1>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                  <Link to={`/cook/${listing.cook_name}`} className="flex items-center gap-3 hover:opacity-80 transition-all">
+                    <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center overflow-hidden">
                       {listing.cook_image ? (
-                        <img src={listing.cook_image} alt="" className="w-full h-full rounded-full object-cover" />
+                        <img src={listing.cook_image} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <span>👨‍🍳</span>
+                        <span className="text-xl">👨‍🍳</span>
                       )}
                     </div>
                     
 
                     <div>
-                      <Link 
-                        to={`/cook/${listing.cook}`}
-                        className="font-medium hover:underline"
-                        style={{ color: 'var(--color-dark)' }}
-                      >
-                        {listing.cook_name}
-                      </Link>
-                      <p className="text-sm" style={{ color: 'var(--color-gray-500)' }}>Home Cook</p>
+                      <p className="font-medium" style={{ color: 'var(--color-dark)' }}>{listing.cook_name}</p>
+                      <p className="text-sm" style={{ color: 'var(--color-gray-500)' }}>
+                        {listing.cook_rating > 0 ? `⭐ ${listing.cook_rating}` : 'Home Cook'}
+                        {listing.cook_total_orders > 0 && ` • ${listing.cook_total_orders} orders`}
+                      </p>
                     </div>
-
-
-                  </div>
+                  </Link>
                 </div>
                 <div className="text-right">
                   <p className="font-display text-3xl" style={{ color: 'var(--color-primary)' }}>
@@ -203,12 +198,18 @@ function ListingDetail() {
                 </div>
               </div>
 
+              {listing.cook_bio && (
+                <p className="text-sm italic mb-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-cream)', color: 'var(--color-gray-600)' }}>
+                  "{listing.cook_bio}"
+                </p>
+              )}
+
               <p className="mb-4" style={{ color: 'var(--color-gray-700)' }}>
                 {listing.description}
               </p>
 
               {/* Quick Info */}
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3 mb-4">
                 <span className="badge" style={{ backgroundColor: 'var(--color-cream)' }}>
                   ⏱️ {listing.prep_time} min
                 </span>
@@ -230,7 +231,44 @@ function ListingDetail() {
                   </span>
                 )}
               </div>
+
+              {/* Accepted Payments */}
+              {listing.accepted_payments?.length > 0 && (
+                <div className="p-4 rounded-xl border-2 border-dashed" style={{ borderColor: 'var(--color-gray-200)' }}>
+                  <p className="text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>
+                    💳 Accepted Payments
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {listing.accepted_payments.map(payment => (
+                      <span key={payment} className="badge badge-primary">
+                        {payment === 'cash' && '💵 Cash'}
+                        {payment === 'venmo' && '📱 Venmo'}
+                        {payment === 'zelle' && '📱 Zelle'}
+                        {payment === 'paypal' && '💳 PayPal'}
+                        {payment === 'cashapp' && '📱 Cash App'}
+                        {payment === 'apple_pay' && '🍎 Apple Pay'}
+                        {payment === 'card' && '💳 Card'}
+                      </span>
+                    ))}
+                  </div>
+                  {listing.payment_notes && (
+                    <p className="text-sm mt-2" style={{ color: 'var(--color-gray-500)' }}>
+                      {listing.payment_notes}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
+
+            {/* Pickup Instructions */}
+            {listing.pickup_instructions && (
+              <div className="card p-6">
+                <h3 className="font-display text-xl mb-3" style={{ color: 'var(--color-dark)' }}>
+                  📍 Pickup Instructions
+                </h3>
+                <p style={{ color: 'var(--color-gray-700)' }}>{listing.pickup_instructions}</p>
+              </div>
+            )}
 
             {/* Dietary & Allergens */}
             {(listing.dietary_tags?.length > 0 || listing.allergens?.length > 0) && (

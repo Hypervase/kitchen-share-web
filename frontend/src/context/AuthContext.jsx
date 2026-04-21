@@ -53,9 +53,15 @@ export function AuthProvider({ children }) {
   };
 
   const becomeCook = async () => {
-    const response = await api.post('/auth/become-cook/');
-    await fetchUser();
-    return response.data;
+    try {
+      const response = await api.post('/auth/become-cook/');
+      // Refresh user data
+      const userResponse = await api.get('/auth/me/');
+      setUser(userResponse.data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   };
 
   return (

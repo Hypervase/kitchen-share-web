@@ -6,9 +6,14 @@ import json
 class ListingSerializer(serializers.ModelSerializer):
     cook_name = serializers.CharField(source='cook.username', read_only=True)
     cook_image = serializers.ImageField(source='cook.profile_image', read_only=True)
+    cook_bio = serializers.CharField(source='cook.cook_profile.bio', read_only=True)
+    cook_rating = serializers.DecimalField(source='cook.cook_profile.rating', max_digits=3, decimal_places=2, read_only=True)
+    cook_total_orders = serializers.IntegerField(source='cook.cook_profile.total_orders', read_only=True)
+    accepted_payments = serializers.JSONField(source='cook.cook_profile.accepted_payments', read_only=True)
+    payment_notes = serializers.CharField(source='cook.cook_profile.payment_notes', read_only=True)
+    pickup_instructions = serializers.CharField(source='cook.cook_profile.pickup_instructions', read_only=True)
     distance = serializers.SerializerMethodField()
     
-    # Accept strings and parse as JSON
     dietary_tags = serializers.JSONField(required=False, default=list)
     allergens = serializers.JSONField(required=False, default=list)
     customization_options = serializers.JSONField(required=False, default=list)
@@ -17,8 +22,9 @@ class ListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Listing
         fields = [
-            'id', 'cook', 'cook_name', 'cook_image', 'title', 'description', 'price',
-            'image', 'cuisine_type', 'dietary_tags', 'available',
+            'id', 'cook', 'cook_name', 'cook_image', 'cook_bio', 'cook_rating', 'cook_total_orders',
+            'accepted_payments', 'payment_notes', 'pickup_instructions',
+            'title', 'description', 'price', 'image', 'cuisine_type', 'dietary_tags', 'available',
             'prep_time', 'servings', 'latitude', 'longitude', 'distance',
             'ingredients', 'allergens', 'spice_level', 'calories',
             'customization_options', 'add_ons',
@@ -27,7 +33,6 @@ class ListingSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'cook', 'created_at', 'updated_at']
 
     def to_internal_value(self, data):
-        # Parse JSON strings from FormData
         if isinstance(data, dict):
             data = data.copy()
             for field in ['dietary_tags', 'allergens', 'customization_options', 'add_ons']:
