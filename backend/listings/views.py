@@ -23,6 +23,20 @@ class ListingViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Listing.objects.filter(available=True)
+
+        search = self.request.query_params.get('search')
+        cuisine = self.request.query_params.get('cuisine')
+        min_price = self.request.query_params.get('min_price')
+        max_price = self.request.query_params.get('max_price')
+
+        if search:
+            queryset = queryset.filter(title__icontains=search)
+        if cuisine:
+            queryset = queryset.filter(cuisine_type=cuisine)
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
         
         # Search by title or description
         search = self.request.query_params.get('search')

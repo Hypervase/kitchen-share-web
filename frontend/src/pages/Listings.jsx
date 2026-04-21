@@ -17,6 +17,7 @@ function Listings() {
   const [selectedDietary, setSelectedDietary] = useState([]);
   const [maxDistance, setMaxDistance] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
+  const [priceRange, setPriceRange] = useState('');
   
   const cuisineOptions = [
     { value: 'all', label: 'All Cuisines' },
@@ -48,7 +49,7 @@ function Listings() {
     if (userLocation || locationError) {
       fetchListings();
     }
-  }, [userLocation, locationError, maxDistance, cuisine, selectedDietary]);
+  }, [userLocation, locationError, maxDistance, cuisine, selectedDietary, priceRange]);
   // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -91,6 +92,7 @@ function Listings() {
       if (selectedDietary.length > 0) {
         selectedDietary.forEach(d => params.append('dietary', d));
       }
+      if(priceRange) params.append('max_price', priceRange);
       
       const response = await api.get(`/listings/?${params.toString()}`);
       setListings(response.data.results || []);
@@ -106,9 +108,10 @@ function Listings() {
     setCuisine('all');
     setSelectedDietary([]);
     setMaxDistance(10);
+    setPriceRange('');
   };
 
-  const hasActiveFilters = search || cuisine !== 'all' || selectedDietary.length > 0 || maxDistance !== 10;
+  const hasActiveFilters = search || cuisine !== 'all' || selectedDietary.length > 0 || maxDistance !== 10 || priceRange;
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-cream)' }}>
@@ -207,6 +210,39 @@ function Listings() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Price Range */}
+              <div>
+                <p className="text-sm font-medium mb-2" style={{ color: 'var(--color-gray-600)' }}>Price</p>
+                <div className="flex flex-col gap-2">
+                  {[
+                    { label: 'Under $10', value: '10' },
+                    { label: 'Under $20', value: '20' },
+                    { label: 'Under $30', value: '30' },
+                    { label: 'Under $50', value: '50' },
+                  ].map((option) => (
+                    <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="priceRange"
+                        value={option.value}
+                        checked={priceRange === option.value}
+                        onChange={() => setPriceRange(option.value)}
+                        className="accent-orange-500"
+                      />
+                      <span className="text-sm" style={{ color: 'var(--color-gray-600)' }}>{option.label}</span>
+                    </label>
+                  ))}
+                  {priceRange && (
+                    <button
+                      onClick={() => setPriceRange('')}
+                      className="text-xs text-orange-500 hover:text-orange-600 text-left underline mt-1"
+                    >
+                      Clear price filter
+                    </button>
+                  )}
+               </div>
               </div>
 
               {/* Distance Slider */}
@@ -368,9 +404,14 @@ function Listings() {
                           <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
                             <span className="text-sm">👨‍🍳</span>
                           </div>
-                          <span className="text-sm font-medium" style={{ color: 'var(--color-gray-700)' }}>
+                          <Link 
+                            to={`/cook/${listing.cook}`} 
+                            className="text-sm font-medium hover:underline"
+                            style={{ color: 'var(--color-primary)' }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             {listing.cook_name}
-                          </span>
+                          </Link>
                         </div>
                         <span className="text-sm" style={{ color: 'var(--color-gray-500)' }}>
                           ⏱️ {listing.prep_time} min
@@ -421,7 +462,15 @@ function ListingCard({ listing, isSelected, onClick }) {
             {listing.cuisine_type}
           </span>
           <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--color-gray-500)' }}>
-            <span>👨‍🍳 {listing.cook_name}</span>
+            <span>👨‍🍳 </span>
+          <Link
+            to={`/cook/${listing.cook}`}
+            className="hover:underline font-medium"
+            style={{ color: 'var(--color-primary)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {listing.cook_name}
+          </Link>
             <span>•</span>
             <span>⏱️ {listing.prep_time} min</span>
             {listing.distance !== null && (

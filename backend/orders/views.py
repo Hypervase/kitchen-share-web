@@ -59,6 +59,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         serializer = ReviewSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(order=order)
+            serializer.save(order=order, reviewer=request.user)
+            from users.models import CookProfile
+            from django.db.models import Avg
+            cook = order.listing.cook
+            cook_profile = CookProfile.objects.get(user=cook)
+            avg = Review.objects.filter(order__listing__cook=cook).aggregate(Avg('rating'))['rating__avg']
+            cook_profile.rating = round(avg,2)
+            cook_profile.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

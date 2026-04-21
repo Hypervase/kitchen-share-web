@@ -177,6 +177,8 @@ function ListingDetail() {
                         <span className="text-xl">👨‍🍳</span>
                       )}
                     </div>
+                    
+
                     <div>
                       <p className="font-medium" style={{ color: 'var(--color-dark)' }}>{listing.cook_name}</p>
                       <p className="text-sm" style={{ color: 'var(--color-gray-500)' }}>
