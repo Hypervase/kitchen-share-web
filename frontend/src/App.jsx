@@ -9,6 +9,8 @@ import ListingDetail from './pages/ListingDetail';
 import EditListing from './pages/EditListing';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
+import CookSetup from './pages/CookSetup';
+import CookProfile from './pages/CookProfile';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
           <Route path="/edit-listing/:id" element={<EditListing />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/cook-setup" element={<CookSetup />} />
+          <Route path="/cook/:username" element={<CookProfile />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

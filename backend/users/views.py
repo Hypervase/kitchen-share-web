@@ -1,9 +1,10 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.conf import settings
@@ -22,7 +23,7 @@ class RegisterView(generics.CreateAPIView):
 class MeView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_object(self):
         return self.request.user
@@ -47,15 +48,28 @@ class BecomeCookView(APIView):
         user.is_cook = True
         user.save()
         CookProfile.objects.get_or_create(user=user)
-        return Response({"detail": "You are now a cook!"}, status=status.HTTP_201_CREATED)
+        return Response({"detail": "You are now a cook!", "redirect": "/cook-setup"}, status=status.HTTP_201_CREATED)
 
 
 class CookProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = CookProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_object(self):
         profile, created = CookProfile.objects.get_or_create(user=self.request.user)
+        return profile
+
+
+class PublicCookProfileView(generics.RetrieveAPIView):
+    """Public view of a cook's profile"""
+    serializer_class = CookProfileSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_object(self):
+        username = self.kwargs.get('username')
+        user = get_object_or_404(User, username=username, is_cook=True)
+        profile, created = CookProfile.objects.get_or_create(user=user)
         return profile
 
 

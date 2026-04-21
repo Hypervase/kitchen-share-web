@@ -14,11 +14,20 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
     try {
       await login(username, password);
-      navigate('/');
+      
+      // Check if there's a redirect path stored
+      const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+      if (redirectPath) {
+        sessionStorage.removeItem('redirectAfterLogin');
+        navigate(redirectPath);
+      } else {
+        navigate('/');
+      }
     } catch (err) {
-      setError('Invalid username or password');
+      setError(err.response?.data?.detail || 'Login failed');
     }
   };
 
