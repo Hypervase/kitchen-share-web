@@ -1,17 +1,34 @@
-from django.urls import path
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import (
-    RegisterView, MeView, BecomeCookView, GoogleLoginView, 
-    CookProfileView, PublicCookProfileView
-)
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Navbar from './components/common/Navbar';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Listings from './pages/Listings';
+import CreateListing from './pages/CreateListing';
+import ListingDetail from './pages/ListingDetail';
+import EditListing from './pages/EditListing';
+import Orders from './pages/Orders';
+import Profile from './pages/Profile';
 
-urlpatterns = [
-    path('register/', RegisterView.as_view(), name='register'),
-    path('login/', TokenObtainPairView.as_view(), name='login'),
-    path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('me/', MeView.as_view(), name='me'),
-    path('become-cook/', BecomeCookView.as_view(), name='become_cook'),
-    path('google/', GoogleLoginView.as_view(), name='google_login'),
-    path('cook-profile/', CookProfileView.as_view(), name='cook_profile'),
-    path('cook/<str:username>/', PublicCookProfileView.as_view(), name='public_cook_profile'),
-]
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Listings />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/listings" element={<Navigate to="/" replace />} />
+          <Route path="/listings/:id" element={<ListingDetail />} />
+          <Route path="/create-listing" element={<CreateListing />} />
+          <Route path="/edit-listing/:id" element={<EditListing />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
+
+export default App;
