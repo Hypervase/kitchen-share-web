@@ -39,7 +39,8 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Not your order"}, status=status.HTTP_403_FORBIDDEN)
         
         new_status = request.data.get('status')
-        if new_status not in dict(Order.STATUS_CHOICES):
+        #if new_status not in dict(Order.STATUS_CHOICES):
+        if new_status not in dict(choice[0] for choice in Order.Status.choices):
             return Response({"detail": "Invalid status"}, status=status.HTTP_400_BAD_REQUEST)
         
         order.status = new_status
